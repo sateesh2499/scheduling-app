@@ -1,34 +1,88 @@
-<div>
-  <h2>Search Studio</h2>
+<div class="container-fluid">
+  <div class="row home-container">
+    <div class="col-sm-4 col-sm-offset-4">
 
-  <form [formGroup]="studioForm" (ngSubmit)="search(studioForm)">
-    <input formControlName="studioName" placeholder="Studio Name" required>
-    <input formControlName="localDate" placeholder="Date" required>  
-    <button type="submit">Search</button>
-    <button (click)="reset()">Reset</button>
-  </form>
-  <hr />
-  <div *ngIf="studioDetails || showSlotForm">
-    <form [formGroup]="slotsForm">
-      <input formControlName="startTime" placeholder="Start Time" required>
-      <input formControlName="endTime" placeholder="End Time" required> 
-      <input formControlName="faculty" placeholder="Faculty" required>
-      <input formControlName="assignerName" placeholder="Assigner Name" required>
-      
-      <!-- TODO: support for adding multiple time slots -->
+      <!-- alert messages -->
+      <div *ngIf="successMsg" class="alert alert-success" role="alert">
+        {{successMsg}}
+      </div>
+      <div *ngIf="errorMsg" class="alert alert-danger" role="alert">
+        {{errorMsg}}
+      </div>
 
-      <!-- <button type="submit">Add </button> -->
-    </form>
-    <br />
-    <button (click)="createStudio(studioForm,slotsForm, showSlotForm)">{{showSlotForm ? 'Create Studio': 'Update Studio'}}</button>
+      <!-- search studio code start -->
+      <div class="jumbotron">
+        <div class="studio-container">
+          <h2>Search Studio</h2>
+          <form [formGroup]="studioForm" (ngSubmit)="search(studioForm)">
+            <div class="form-group">
+              <label for="studioName">Studio Name</label>
+              <input type="text" class="form-control" [class.form-submitted]="formSubmitted" id="studioName"
+                formControlName="studioName" placeholder="Studio Name" required>
+            </div>
+            <div class="form-group">
+              <label for="localDate">Date (yyyy-mm-dd)</label>
+              <input type="text" class="form-control" [class.form-submitted]="formSubmitted" id="localDate"
+                formControlName="localDate" placeholder="Date" [pattern]="datePattern" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+          </form>
+          <br />
+          <button (click)="reset()" class="btn btn-default">Reset</button>
+        </div>
+      </div>
+      <!-- search studio code end -->
+
+      <!-- slots display code start -->
+      <ng-container *ngIf="slotsList && slotsList.length">
+        <div class="panel panel-default" *ngFor="let s of slotsList; let index = index">          
+          <div class="panel-body">
+            <h3>Slot: {{index + 1}}</h3>
+            <hr />
+            <div class="form-group">
+              <label for="startTime">Start Time (hh:mm)</label>
+              <input type="text" class="form-control" [class.form-submitted]="formSubmitted" #startTimeField="ngModel"
+                [(ngModel)]="s.startTime" id="startTime" name="startTime" placeholder="Start Time" [pattern]="timePattern"
+                required>
+              <p class="error-msg" *ngIf="formSubmitted && startTimeField.errors?.pattern">Enter time in hh:mm format</p>
+            </div>
+            <div class="form-group">
+              <label for="endTime">End Time (hh:mm)</label>
+              <input type="text" class="form-control" [class.form-submitted]="formSubmitted" #endTimeField="ngModel"
+                [(ngModel)]="s.endTime" id="endTime" name="endTime" placeholder="End Time" [pattern]="timePattern"
+                required>
+              <p class="error-msg" *ngIf="formSubmitted && endTimeField.errors?.pattern">Enter time in hh:mm format</p>
+            </div>
+            <div class="form-group">
+              <label for="faculty">Faculty</label>
+              <input type="text" class="form-control" [class.form-submitted]="formSubmitted" #inputField="ngModel"
+                [(ngModel)]="s.faculty" id="faculty" name="faculty" placeholder="Faculty" required>
+            </div>
+            <div class="form-group">
+              <label for="assignerName">Assigner Name</label>
+              <input type="text" class="form-control" [class.form-submitted]="formSubmitted" #inputField="ngModel"
+                [(ngModel)]="s.assignerName" id="assignerName" name="assignerName" placeholder="Assigner Name" required>
+            </div>
+            <button class="btn btn-sm btn-danger" (click)="removeSlot(index)">Remove</button>
+          </div>
+        </div>
+      </ng-container>
+      <!-- slots display code end -->
+
+      <!-- save / udpate / add slot buttons -->
+      <div *ngIf="!studioNotExists && slotsList && slotsList.length">
+        <button class="btn btn-bg btn-success" (click)="save(existingStudio)">{{existingStudio ? 'Update' : 'Save'}}</button>
+        <button (click)="addSlot()" class="btn btn-default">Add Slot +</button>
+      </div>
+
+      <!-- display message when studio doesn't exist -->
+      <div *ngIf="studioNotExists">
+        <p>
+          This Studio doesn't exist. Add a Slot below and Save to create a new Studio.
+        </p>
+        <button (click)="addSlot()" class="btn btn-default">Add Slot</button>
+      </div>
+
+    </div>
   </div>
-  
-  <div *ngIf="searchSubmitted && noSchedules && !showSlotForm">
-    This Studio Name / Date doesn't exist.
-    <button (click)="displaySlot()">Create New Studio</button>
-  </div>
-</div>
-
-<div *ngIf="displayError">
-  <h2>An error occured.</h2>
 </div>

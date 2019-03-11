@@ -1,0 +1,9 @@
+.studio-container{
+    padding: 15px;
+}
+.form-submitted.ng-invalid{
+    border: 1px solid red;
+}
+.error-msg{
+    color: red;
+}
